@@ -1,5 +1,5 @@
 // Kalon Beauty Land — Full PWA + Web Push Service Worker (GitHub Pages / PWABuilder TWA)
-var CACHE_NAME = "kalon-pwa-v2";
+var CACHE_NAME = "kalon-pwa-v3";
 var SHELL_ASSETS = ["./", "./index.html", "./manifest.json", "./pwa-192x192.png", "./pwa-512x512.png"];
 
 self.addEventListener("install", function (event) {
@@ -29,8 +29,10 @@ self.addEventListener("fetch", function (event) {
   if (!req || req.method !== "GET") return;
   var url = new URL(req.url);
   if (url.origin !== self.location.origin) return;
+  var isHtmlNav = req.mode === "navigate" || url.pathname.endsWith("/") || url.pathname.endsWith(".html");
+  var netReq = isHtmlNav ? new Request(req.url, { cache: "no-store", credentials: "same-origin" }) : req;
   event.respondWith(
-    fetch(req).then(function (res) {
+    fetch(netReq).then(function (res) {
       if (res && res.status === 200 && res.type === "basic") {
         var copy = res.clone();
         caches.open(CACHE_NAME).then(function (cache) {
